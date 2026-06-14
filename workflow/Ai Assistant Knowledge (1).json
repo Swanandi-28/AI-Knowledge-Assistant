@@ -1,0 +1,384 @@
+{
+  "name": "Ai Assistant Knowledge",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful asYou are an AI Knowledge Assistant.\n\nAlways use the document retrieval tool to find relevant information before answering.\n\nRules:\n\n* Answer only using information found in the retrieved documents whenever possible.\n* Cite the source chunk or document section when available.\n* If the information is not found in the documents, clearly state that it is not available in the uploaded documents.\n* Do not hallucinate or invent information.\n* Explain concepts in a simple and beginner-friendly manner.\n* Keep answers structured using bullet points when appropriate.\n* Use conversation memory to handle follow-up questions.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1744,
+        1200
+      ],
+      "id": "74235302-cd96-4772-8d62-00c89e1d388b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1808,
+        1424
+      ],
+      "id": "b32c1a85-3910-4d67-a565-c1a25062ccde",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1904,
+        560
+      ],
+      "id": "9e1e8dc2-d864-490a-b9f9-9d2c9379ddf9",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        },
+        "clearStore": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        2160,
+        560
+      ],
+      "id": "35b0e8a5-ca42-4956-b15d-b9dfa1a38d98",
+      "name": "Simple Vector Store",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "You MUST use the document retrieval tool before answering.\n\nIf the user asks for a document summary, retrieve multiple relevant sections from the document and generate a concise summary from the retrieved content.\n\nIf the retrieved content is insufficient, state that more document content is needed.",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        },
+        "topK": 30,
+        "includeDocumentMetadata": false
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        1936,
+        1424
+      ],
+      "id": "cb8b84c8-199b-4e7d-b585-ac10025104cb",
+      "name": "Simple Vector Store1"
+    },
+    {
+      "parameters": {
+        "textSplittingMode": "custom",
+        "options": {
+          "splitPages": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        2320,
+        784
+      ],
+      "id": "51d593ad-112d-4505-9c2c-433b4edc377a",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        2336,
+        992
+      ],
+      "id": "596ff5bd-bd51-493e-a36a-63e547e61376",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1EBqX2UGj9Px9QTLzZEExL2ovnjFNrOCV",
+          "mode": "list",
+          "cachedResultName": "olympics24.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1EBqX2UGj9Px9QTLzZEExL2ovnjFNrOCV/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1680,
+        560
+      ],
+      "id": "f0f2f0bb-0550-4e21-b3c6-86bfe87b83b0",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GSD3GhKzgPMiwz1u",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2128,
+        784
+      ],
+      "id": "14c237b6-cb0a-4d90-98bb-4e0f6ae74ace",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "USRVpa3IrVWFAXdS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        1408
+      ],
+      "id": "34de9ee2-d7b1-4e18-b2bf-924b4c0f9660",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "2IGeBXZqsq6816Zv",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        1632
+      ],
+      "id": "7fe1cedb-a481-4e76-b49b-0c4c2bdde805",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "USRVpa3IrVWFAXdS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "=={{ { output: $json.output } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2096,
+        1200
+      ],
+      "id": "d8f21b13-3861-429d-b09b-48520b4ebd68",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        1472,
+        1200
+      ],
+      "id": "302be2ec-ff49-4c27-b03a-758ed279961d",
+      "name": "When chat message received",
+      "webhookId": "4ffbe371-6d90-46e9-a924-e84056463181"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        560
+      ],
+      "id": "9d76cead-d9b6-4b06-8595-6b45168a0fe8",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store": {
+      "main": [
+        []
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c7529fb7-2f56-4212-9705-aece6d6654f0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9812410ef94e6cc65244dd8fb15f623e5aa743c766c49ff975ebab6d815e40a0"
+  },
+  "nodeGroups": [],
+  "id": "8oASTXzTNOnkq2LK",
+  "tags": []
+}
