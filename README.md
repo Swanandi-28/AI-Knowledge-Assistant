@@ -50,6 +50,7 @@ An AI-powered Knowledge Assistant built using **n8n**, **Large Language Models (
 
 ### Document Ingestion Workflow
 
+```text
 PDF Document
      │
      ▼
@@ -63,10 +64,11 @@ Generate Embeddings
      │
      ▼
 Store in Vector Database
-
+```
 
 ### Question Answering Workflow
 
+```text
 User Query
     │
     ▼
@@ -86,10 +88,11 @@ Generate Answer
     │
     ▼
 Response to User
-
+```
 
 ### System Architecture
 
+```text
 ┌─────────────────┐
 │  PDF Documents  │
 └────────┬────────┘
@@ -124,7 +127,7 @@ Response to User
 ┌─────────────────┐
 │ Generated Answer│
 └─────────────────┘
-
+```
 
 ---
 
