@@ -1,0 +1,367 @@
+{
+  "name": "workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an AI Knowledge Assistant that answers questions using information retrieved from uploaded documents.\n\nInstructions:\n\n1. Use the document context provided by the retrieval tool as the primary source of information.\n\n2. If the user asks a specific question, answer using the retrieved document content.\n\n3. If the user asks for:\n\n   * a summary,\n   * an overview,\n   * key points,\n   * main topics,\n   * important concepts,\n   * document highlights,\n\n   generate a concise summary from the retrieved document context instead of looking for the exact words in the document.\n\n4. If sufficient document context is available, provide a complete and well-structured response.\n\n5. If the retrieved context is incomplete, clearly state that the answer is based only on the available document content.\n\n6. Only respond with \"I could not find that information in the uploaded document\" when no relevant document context is retrieved.\n\n7. Do not invent facts that are not present in the retrieved document context.\n\n8. When possible, cite or reference the relevant section of the document that supports the answer.\n\n9. Be clear, concise, and helpful.\n\n10. For summary requests:\n\n    * Provide a short overview.\n    * List the main topics covered.\n    * Highlight key points and important details.\nALWAYS call the Pinecone Vector Store tool first. Do not skip the Pinecone vector tool."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1712,
+        1104
+      ],
+      "id": "a2e45781-f1fc-481c-bacf-83b543e121ec",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        1312
+      ],
+      "id": "1b6f10d2-8749-4e0d-8992-0613aea531f2",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "2IGeBXZqsq6816Zv",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1760,
+        1328
+      ],
+      "id": "c56cd61e-6bff-4285-86d0-5bbf3f7e951d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "formTitle": "AI Knowledge Assistant",
+        "formDescription": "Hello",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Hello",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        1264,
+        272
+      ],
+      "id": "5c0c1f97-6026-4fad-b85a-ddbda29611af",
+      "name": "On form submission1",
+      "webhookId": "6e509d73-81b8-4a00-bf07-e28c1056cef7"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "upload",
+        "responseMode": "lastNode",
+        "options": {
+          "allowedOrigins": "http://127.0.0.1:5500",
+          "responseCode": {
+            "values": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1264,
+        80
+      ],
+      "id": "07219ba0-fd4a-4405-9734-83d3efb3a228",
+      "name": "Webhook1",
+      "webhookId": "779d31cf-6dcd-4646-a20d-3c32c2c66f26"
+    },
+    {
+      "parameters": {
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1920,
+        528
+      ],
+      "id": "156148a6-9494-40d0-8321-e68eac66f791",
+      "name": "Default Data Loader1"
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        736
+      ],
+      "id": "70b29b34-5294-4fd4-82d9-1149098630a5",
+      "name": "Recursive Character Text Splitter1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        1472,
+        1104
+      ],
+      "id": "c1f99d12-e9da-4e1c-a4cc-b0df7fd703f8",
+      "name": "When chat message received",
+      "webhookId": "d30bd5c3-8ae7-4afd-a312-f4eaebe2c626"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "hello",
+          "mode": "list",
+          "cachedResultName": "hello"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        1792,
+        272
+      ],
+      "id": "bd0b407b-c54d-4c91-8093-84d87f943d53",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "XnN7joeIfeKHwgna",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to search the uploaded PDF stored in Pinecone. Always use this tool whenever the user asks questions about the uploaded document, including summaries, explanations, key points, facts, or specific information. Do not answer from your own knowledge if the question is about the uploaded PDF.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "hello",
+          "mode": "list",
+          "cachedResultName": "hello"
+        },
+        "topK": 30,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        1952,
+        1376
+      ],
+      "id": "99e170ea-58a6-4c45-80ea-7249f599624b",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "XnN7joeIfeKHwgna",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        496
+      ],
+      "id": "a15d8f9f-a83c-4b48-948a-53f12d423d0b",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "NHWxuBohQjRiJDdx",
+          "name": "Cohere account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        2016,
+        1584
+      ],
+      "id": "6bbc5d8f-cafe-430c-acbc-cd20ef94bf0e",
+      "name": "Embeddings Cohere1",
+      "credentials": {
+        "cohereApi": {
+          "id": "NHWxuBohQjRiJDdx",
+          "name": "Cohere account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission1": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter1": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader1",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "main": [
+        []
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "167b2c2b-5431-44dc-9b46-3f93989b6897",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9812410ef94e6cc65244dd8fb15f623e5aa743c766c49ff975ebab6d815e40a0"
+  },
+  "nodeGroups": [],
+  "id": "6b5oaLJbh2UkyaiM",
+  "tags": []
+}
